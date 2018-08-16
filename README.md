@@ -1,9 +1,11 @@
 # todo-api
 
+## cases
 1) case1 => For simple test where we will check our unit test is working or not
 2) case2 => todo api where we have completed CRUD operation with NoSQL DB (MongoDB)
 3) case3 => we will create test cases for our api
 
+### case1
 1) git clone https://github.com/IrfanMumtaz/todo-api.git
 2) cd todo-api/case1
 3) open command prompt here
