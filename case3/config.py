@@ -1,2 +1,3 @@
 DEBUG = True
 TESTING = False
+PORT = 3000
