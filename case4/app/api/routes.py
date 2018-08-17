@@ -57,9 +57,10 @@ def task(id):
             task = request.get_json(silent=True)
 
             #iterate data and verify give json keys
-            for t in task:
-                if(t in _task):
-                    _task.t = task[t]
+            if 'title' in task:
+                _task.title=task['title']
+            if 'status' in task:
+                _task.status=task['status']
             
             _task.updated_at = time.strftime('%d-%m-%Y %H:%M:%S')
 
@@ -103,23 +104,19 @@ def create_taks():
     if (request.data):
 
         #validate task key is avaialable or not
-        if "task" in _data :
+        if "title" in _data :
             #store everything in a dictionary
             todo = ToDo(
-                _data['task'],
+                _data['title'],
                 "view",
                 time.strftime('%d-%m-%Y %H:%M:%S'),
                 time.strftime('%d-%m-%Y %H:%M:%S')
             )
             db.session.add(todo)
-            id = db.session.commit()
-            return dumps(id)
-
-            #insert data and get key
-            # id = db.insert(data)
+            db.session.commit()
 
             #if key is valid get data
-            return jsonify({"result": todo}), 200
+            return jsonify({"result": "success"}), 200
         else:
             return jsonify({"result": "task can not be null"}), 400
     else:
