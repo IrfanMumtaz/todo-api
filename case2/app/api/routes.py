@@ -12,6 +12,36 @@ mod = Blueprint('api', __name__)
 
 mongo = PyMongo(app)
 
+def conn():
+    return mongo.db.tasks
+
+def get_data(id):
+    db = conn()
+    result = db.find_one({'_id': ObjectId(id)})
+    if result:
+        id = json.loads(dumps(result['_id']))
+        #iterate data and key
+        data = {
+            '_id': id["$oid"],
+            'task': result['task'],
+            'status': result['status'],
+            'created_at': result['created_at'],
+            'updated_at': result['updated_at'],
+        }
+        return data
+    else:
+        return False
+
+def update_data(data, _task):
+    db = mongo.db.tasks
+    for t in data:
+        if(t in _task):
+            _task[t] = data[t]
+    
+    _task['updated_at'] = time.strftime('%d-%m-%Y %H:%M:%S')
+
+    return db.save(_task)
+
 
 @mod.route('/tasks')
 def tasks():
@@ -27,7 +57,7 @@ def tasks():
 
         #append data in list
         tasks.append({
-            '_id': id["$oid"],
+            '_id': id,
             'task': task['task'],
             'status': task['status'],
             'created_at': task['created_at'],
@@ -35,42 +65,24 @@ def tasks():
         })
     return jsonify({"result": tasks}), 200
 
-@mod.route('/task/<id>', methods=['POST', 'GET', 'DELETE'])
+@mod.route('/task/<id>', methods=['PUT', 'GET', 'DELETE'])
 def task(id):
-    #get data from database
-    db = mongo.db.tasks
-    _task = db.find_one({'_id': ObjectId(id)})
+    _task = get_data(id)
 
-    if(_task is None):
+    # return dumps(_task)
+    if _task is False:
         return jsonify({"result": "oopsss data not found"}), 204
 
-    if request.method == 'POST':
+    if request.method == 'PUT':
         if (request.data):
         
             #get data from json request
-            task = request.get_json(silent=True)
+            data = request.get_json(silent=True)
 
-            #iterate data and verify give json keys
-            for t in task:
-                if(t in _task):
-                    _task[t] = task[t]
-            
-            _task['updated_at'] = time.strftime('%d-%m-%Y %H:%M:%S')
+            update = update_data(data, _task)
 
-            #save updated data
-            db.save(_task)
-            if(id):
-                _task = db.find_one({'_id': ObjectId(id)})
-                id = json.loads(dumps(_task['_id']))
-
-                #iterate data and key
-                task = {
-                    '_id': id["$oid"],
-                    'task': _task['task'],
-                    'status': _task['status'],
-                    'created_at': _task['created_at'],
-                    'updated_at': _task['updated_at'],
-                }
+            if update:
+                task = get_data(update)
                 return jsonify({"result": task}), 200
             else:
                 return jsonify({"result": "oopss something went wrong!!"}), 102
@@ -80,6 +92,7 @@ def task(id):
 
     elif request.method == 'DELETE':
         #remove data
+        db = conn()
         result = db.remove(_task)
         if(result):
             return jsonify({"result": "Data Successfully Deleted"}), 200
@@ -88,18 +101,7 @@ def task(id):
 
         
     else:
-        #convert json object into dictionary
-        id = json.loads(dumps(_task['_id']))
-
-        #iterate data and key
-        task = {
-            '_id': id["$oid"],
-            'task': _task['task'],
-            'status': _task['status'],
-            'created_at': _task['created_at'],
-            'updated_at': _task['updated_at'],
-        }
-        return jsonify({"result": task}), 200
+        return jsonify({"result": _task}), 200
         
 @mod.route('/task', methods=["POST"])
 def create_taks():

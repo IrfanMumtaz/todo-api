@@ -21,6 +21,16 @@ class CreateData(unittest.TestCase):
     def tearDown(self):
         pass
 
+
+    # def test_add(self):
+    #     response = self.app.post('http://localhost:8000/todo/api/v1.0/task/add',data=json.dumps(dict({'title':'First', 'description' : 'Lase'})), content_type='application/json')
+    #     self.assertEqual(response.status_code, 200)
+
+    # def test_add(self):
+    #     response = self.app.get('http://localhost:8000/todo/api/v1.0/task/view')
+    #     self.assertEqual(response.status_code, 200)
+
+
     def test_post_create(self):
         response = self.app.post('/api/v1.0/task',
                         data=json.dumps(dict(task='testing task')),

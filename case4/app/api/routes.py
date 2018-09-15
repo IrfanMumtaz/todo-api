@@ -12,7 +12,7 @@ mod = Blueprint('api', __name__)
 
 db = SQLAlchemy(app)
 
-from .models import ToDo
+from .models import ToDo, UltimateTodo
 
 
 
@@ -110,6 +110,35 @@ def create_taks():
                 _data['title'],
                 "view",
                 time.strftime('%d-%m-%Y %H:%M:%S'),
+                time.strftime('%d-%m-%Y %H:%M:%S')
+            )
+            db.session.add(todo)
+            db.session.commit()
+
+            #if key is valid get data
+            return jsonify({"result": "success"}), 200
+        else:
+            return jsonify({"result": "task can not be null"}), 400
+    else:
+        return jsonify({"result": "Bad request, request must contain json data"}), 400
+
+@mod.route('/ultimate', methods=["POST"])
+def ultimate_taks():
+
+    #get data from json request
+    _data = request.get_json(silent=True)
+
+    if (request.data):
+
+        #validate task key is avaialable or not
+        if "username" in _data :
+            #store everything in a dictionary
+            todo = UltimateTodo(
+                _data['username'],
+                _data['password'],
+                _data['email'],
+                _data['age'],
+                _data['gender'],
                 time.strftime('%d-%m-%Y %H:%M:%S')
             )
             db.session.add(todo)
